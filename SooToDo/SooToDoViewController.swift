@@ -10,7 +10,7 @@ import UIKit
 
 class SooToDoViewController: UITableViewController {
 
-    let itemArray = ["Make Grime Quiz", "Have saved locations for Clima", "Conversion calc", "More stuff to sooty chat"]
+    var itemArray = ["Make Grime Quiz", "Have saved locations for Clima", "Conversion calc", "More stuff to sooty chat"]
     
     
     override func viewDidLoad() {
@@ -43,14 +43,35 @@ class SooToDoViewController: UITableViewController {
         }
         
         tableView.deselectRow(at: indexPath, animated: true)
+
+    }
+    
+    //MARK - Add New Items
+
+    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         
+        var textField = UITextField()
         
+        let alert = UIAlertController(title: "Add new to do item", message: "", preferredStyle: .alert)
         
+        let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
+            //what will happen when the user clicks the add item from the alert
+            self.itemArray.append(textField.text!)
+            self.tableView.reloadData()
+        }
+            
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Create new item"
+            textField = alertTextField
+        }
+        
+        alert.addAction(action)
+        
+        present(alert, animated: true, completion: nil)
         
     }
-
+    
 
 
 
 }
-
