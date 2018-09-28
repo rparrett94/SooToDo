@@ -13,8 +13,12 @@ class SooToDoViewController: UITableViewController {
     var itemArray = ["Make Grime Quiz", "Have saved locations for Clima", "Conversion calc", "More stuff to sooty chat"]
     
     
+    let defaults = UserDefaults.standard
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        itemArray = defaults.array(forKey: "ToDoListArray") as! [String]
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -57,6 +61,9 @@ class SooToDoViewController: UITableViewController {
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             //what will happen when the user clicks the add item from the alert
             self.itemArray.append(textField.text!)
+            
+            self.defaults.set(self.itemArray, forKey: "ToDoListArray")
+            
             self.tableView.reloadData()
         }
             
