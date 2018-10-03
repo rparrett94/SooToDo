@@ -9,18 +9,29 @@
 import UIKit
 
 class SooToDoViewController: UITableViewController {
-
-    var itemArray = ["Make Grime Quiz", "Have saved locations for Clima", "Conversion calc", "More stuff to sooty chat"]
     
+    var itemArray = [Item]()
+    
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
     
     let defaults = UserDefaults.standard
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        itemArray = defaults.array(forKey: "ToDoListArray") as! [String]
+        
+        
+        print(dataFilePath)
+        
+
+
+        
+        loadItems()
+
+        
+        
+        
     }
-    
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return itemArray.count
     }
@@ -28,30 +39,31 @@ class SooToDoViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)
         
-        cell.textLabel?.text = itemArray[indexPath.row]
+        let item = itemArray[indexPath.row]
         
+        cell.textLabel?.text = item.title
+
+        cell.accessoryType = item.done ? .checkmark : .none
+
         return cell
     }
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-      //  print(itemArray[indexPath.row])
+        //  print(itemArray[indexPath.row])
         
         
+        itemArray[indexPath.row].done = !itemArray[indexPath.row].done
         
-        
-        
-        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .none
-        } else {
-            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
-        }
-        
-        tableView.deselectRow(at: indexPath, animated: true)
+        saveItems()
 
+        tableView.deselectRow(at: indexPath, animated: true)
+        
+        
+        
     }
     
     //MARK - Add New Items
-
+    
     @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
         
         var textField = UITextField()
@@ -60,13 +72,19 @@ class SooToDoViewController: UITableViewController {
         
         let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
             //what will happen when the user clicks the add item from the alert
-            self.itemArray.append(textField.text!)
             
-            self.defaults.set(self.itemArray, forKey: "ToDoListArray")
             
-            self.tableView.reloadData()
+            let newItem = Item()
+            newItem.title = textField.text!
+            
+            
+            self.itemArray.append(newItem)
+            
+            self.saveItems()
+            
+            
         }
-            
+        
         alert.addTextField { (alertTextField) in
             alertTextField.placeholder = "Create new item"
             textField = alertTextField
@@ -79,6 +97,36 @@ class SooToDoViewController: UITableViewController {
     }
     
 
+    
+    
 
+func saveItems() {
+    let encoder = PropertyListEncoder()
 
+    do {
+        
+        let data = try encoder.encode(itemArray)
+        try data.write(to: dataFilePath!)
+        
+    } catch {
+        print("Error encoding item array, \(error)")
+    }
+    
+    self.tableView.reloadData()
+}
+
+    func loadItems() {
+        if let data = try? Data(contentsOf: dataFilePath!) {
+            let decoder = PropertyListDecoder()
+            do {
+            itemArray = try decoder.decode([Item].self, from: data)
+            } catch {
+                print("Error decoding stuff \(error)")
+            }
+        
+        }
+    }
+    
+    
+    
 }
